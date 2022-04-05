@@ -1,0 +1,21 @@
+{
+  "name": "kmarkdown",
+  "version": "2022.100.1",
+  "description": "A simple parser for a small subset of Markdown Syntax, written in JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx jest --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "REPO_URL_HERE"
+  },
+  "author": "347Online",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.12.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "jest": "^27.5.1"
+  }
+}
