@@ -1,39 +1,12 @@
 const fs = require('fs');
+const {Token, TokenType} = require('./Token');
 
-class Token {
-  constructor(type, value = null) {
-    this.type = type;
-    this.value = value;
-  }
-}
-
-class TokenType {
-  static Types = [];
-
-  constructor(type) {
-    this.type = type;
-    TokenType.Types.push(this);
-  }
-
-  static Heading  = new TokenType("HEADING");
-  static Emphasis = new TokenType("EMPHASIS");
-  static Strong   = new TokenType("STRONG");
-  static Text     = new TokenType("TEXT");
-  static Newline  = new TokenType("NEWLINE");
-}
-
-/**
- * Turns a string of Markdown into an Array of Tokens
- * @param {string} string 
- * 
- * @returns {Array} [tokens]
-*/
 const lex = (string) => {
   const tokens = [];
   let textblock = '';
   const flush = () => {
     if (textblock) {
-      tokens.push(new Token(TokenType.Text, textblock));
+      tokens.push(new Token(Token.Text, textblock));
       textblock = '';
     }
   };
@@ -42,18 +15,15 @@ const lex = (string) => {
   for (let i = 0, l = string.length; i < l; i++) {
     const char = string[i];
 
-    const headings = { 
-    };
-
     switch (char) {
       case '_':
       case '*':
         flush()
         if (string[i + 1] === char) {
           i++;
-          tokens.push(new Token(TokenType.Strong));
+          tokens.push(new Token(Token.Strong));
         } else {
-          tokens.push(new Token(TokenType.Emphasis));
+          tokens.push(new Token(Token.Emphasis));
         }
       break;
       
@@ -62,13 +32,13 @@ const lex = (string) => {
         while (string[++i] === char) count++;
         //i--;
         count = Math.min(count,6);
-        tokens.push(new Token(TokenType.Heading,count));
+        tokens.push(new Token(Token.Heading,count));
         }
       break;
 
       case '\n':
         flush();
-        tokens.push(new Token(TokenType.Newline));
+        tokens.push(new Token(Token.Newline));
       break;
 
       default:
@@ -91,18 +61,18 @@ const compileHTML = (tokens) => {
     const token = tokens[i];
 
     switch (token.type) {
-      case TokenType.Strong:
+      case Token.Strong:
         html += strong ? '</strong>' : '<strong>';
         strong = !strong;
       break;
       
-      case TokenType.Emphasis:
+      case Token.Emphasis:
         html += em ? '</em>' : '<em>';
         em = !em;
       break;
 
-      case TokenType.Text:
-        if (i < l - 1 && tokens[i + 1].type === TokenType.Newline && !heading) {
+      case Token.Text:
+        if (i < l - 1 && tokens[i + 1].type === Token.Newline && !heading) {
           html += `<p>${token.value}</p>\n`;
           i++;
         } else {
@@ -110,7 +80,7 @@ const compileHTML = (tokens) => {
         }
       break;
       
-      case TokenType.Newline:
+      case Token.Newline:
         let offset = -5;
         if (heading) {
           console.log('heading here');
@@ -123,7 +93,7 @@ const compileHTML = (tokens) => {
         heading = 0;
       break;
 
-      case TokenType.Heading:
+      case Token.Heading:
         heading = token.value;
         html += `<h${heading}>`;
       break;
@@ -138,16 +108,16 @@ const compileHTML = (tokens) => {
   return `<!DOCTYPE html>\n<html>\n${html}\n</html>`;
 };
 
-const md = fs.readFileSync('./sample.md', {encoding: 'utf8'});
-console.log(md);
-
+const md = fs.readFileSync('./Samples/sample.md', {encoding: 'utf8'});
 const tokens = lex(md);
-console.log(tokens);
-
 const html   = compileHTML(tokens);
+
+
+console.log(md);
+console.log(tokens);
 console.log(html);
 
-fs.writeFileSync('./sample.html',html);
+fs.writeFileSync('./Samples/sample.html',html);
 
 
 module.exports = {};
