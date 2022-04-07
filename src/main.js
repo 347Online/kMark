@@ -1,4 +1,6 @@
 const fs = require('fs');
+const path = require('path');
+
 const {Token, TokenType} = require('./Token');
 
 const lex = (string) => {
@@ -83,12 +85,10 @@ const compileHTML = (tokens) => {
       case Token.Newline:
         let offset = -5;
         if (heading) {
-          console.log('heading here');
           html += `</h${heading}>\n`;
           offset -= 5;
         }
         const slice = html.slice(offset,offset + 4);
-        console.log('|' + slice + '|');
         if (slice !== '</p>' && !heading) html += '<br>\n';
         heading = 0;
       break;
@@ -108,16 +108,23 @@ const compileHTML = (tokens) => {
   return `<!DOCTYPE html>\n<html>\n${html}\n</html>`;
 };
 
-const md = fs.readFileSync('./Samples/sample.md', {encoding: 'utf8'});
-const tokens = lex(md);
-const html   = compileHTML(tokens);
+const parseFile = (fname, verbose = false) => {
+  fname = path.resolve(fname);
+  const pth = path.parse(fname);
+  const savename = path.join(pth.dir, pth.name+'.html');
 
+  const md = fs.readFileSync(fname, {encoding: 'utf8'});
+  const tokens = lex(md);
+  const html = compileHTML(tokens);
 
-console.log(md);
-console.log(tokens);
-console.log(html);
+  if (verbose) {
+    console.log(md);
+    console.log(tokens);
+    console.log(html);
+  }
 
-fs.writeFileSync('./Samples/sample.html',html);
+  fs.writeFileSync(savename,html);
+};
 
-
-module.exports = {};
+parseFile('./Samples/sample.md');
+parseFile('./Presentation.md');
